@@ -1,0 +1,7 @@
+[package]
+name = "yae"
+version = "0.1.0"
+authors = ["theoldmoon0602 <theoldmoon0602@gmail.com>"]
+
+[dependencies]
+ncurses = "*"
