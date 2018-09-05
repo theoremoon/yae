@@ -4,4 +4,7 @@ version = "0.1.0"
 authors = ["theoldmoon0602 <theoldmoon0602@gmail.com>"]
 
 [dependencies]
-ncurses = "*"
+rustbox = "0.11.0"
+
+[patch.crates-io]
+termbox-sys = { git="https://github.com/jmacdonald/termbox-sys" }
