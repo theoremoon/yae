@@ -1,9 +1,12 @@
 extern crate rustbox;
+extern crate unicode_width;
 
 use std::default::Default;
 
 use rustbox::{Color, RustBox};
 use rustbox::Key;
+
+use unicode_width::UnicodeWidthStr;
 
 fn main() {
     let rustbox = match RustBox::init(Default::default()) {
@@ -24,8 +27,9 @@ fn main() {
                 match key {
                     Key::Char('q') => { break; }
                     Key::Char(c) => {
-                        rustbox.print(x, y, rustbox::RB_NORMAL, Color::Default, Color::Default, c.to_string().as_str());
-                        x += 1;
+                        let s = c.to_string();
+                        rustbox.print(x, y, rustbox::RB_NORMAL, Color::Default, Color::Default, s.as_str());
+                        x += s.as_str().width_cjk();
                     },
                     Key::Enter => { y += 1; x = 0; }
                     _ => { }
