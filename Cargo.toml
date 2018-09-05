@@ -10,3 +10,7 @@ unicode-width = "0.1.5"
 
 [patch.crates-io]
 termbox-sys = { git="https://github.com/jmacdonald/termbox-sys" }
+
+[lib]
+name = "yae"
+path = "src/yae/lib.rs"
