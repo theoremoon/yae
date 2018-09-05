@@ -32,7 +32,7 @@ fn main() {
         Result::Ok(v) => v,
         Result::Err(e) => panic!("{}", e),
     };
-    let mut buf = Buffer::new();
+    let mut buf = Buffer::new(rustbox.width(), rustbox.height());
     buf.append_line("Hello World");
     buf.append_line("press q to quit");
 
@@ -74,6 +74,7 @@ fn main() {
                     _ => { }
                 }
             },
+            Ok(rustbox::Event::ResizeEvent(width, height)) => buf.resize(width as usize, height as usize),
             Err(e) => panic!("{}", e),
             _ => {}
         }

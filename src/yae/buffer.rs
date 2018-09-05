@@ -6,15 +6,25 @@ pub struct Buffer {
     pub lines: Vec<String>,
     pub cursor: Cursor,
     pub vcursor: Cursor,
+
+    pub cols: usize,
+    pub rows: usize,
 }
 
 impl Buffer {
-    pub fn new() -> Buffer {
+    pub fn new(cols: usize, rows: usize) -> Buffer {
         Buffer{
             lines: Vec::new(),
             cursor: Cursor::new(0, 0),
             vcursor: Cursor::new(0, 0),
+            cols: cols,
+            rows: rows,
         }
+    }
+
+    pub fn resize(&mut self, cols: usize, rows: usize) {
+        self.cols = cols;
+        self.rows = rows;
     }
 
     pub fn append_line(&mut self, s : &str) {
