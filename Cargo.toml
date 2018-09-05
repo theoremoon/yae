@@ -5,6 +5,7 @@ authors = ["theoldmoon0602 <theoldmoon0602@gmail.com>"]
 
 [dependencies]
 rustbox = "0.11.0"
+xi-rope = "0.2.0"
 unicode-width = "0.1.5"
 
 [patch.crates-io]
