@@ -34,7 +34,7 @@ fn main() {
     };
     let mut buf = Buffer::new(rustbox.width(), rustbox.height());
     buf.append_line("Hello World");
-    buf.append_line("press q to quit");
+    buf.append_line("press ^q to quit");
 
     draw_buffer(&rustbox, &buf);
     rustbox.present();
@@ -43,7 +43,7 @@ fn main() {
         match rustbox.poll_event(false) {
             Ok(rustbox::Event::KeyEvent(key)) => {
                 match key {
-                    Key::Char('q') => {
+                    Key::Ctrl('q') => {
                         break;
                     }
                     Key::Char(c) => {
