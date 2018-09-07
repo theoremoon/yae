@@ -4,6 +4,8 @@ import dcharwidth;
 
 void draw(Buffer buf)
 {
+  clear();
+
   int y = 0;
   foreach (line; buf.lines) {
     int x = 0;
@@ -45,6 +47,9 @@ main_loop:
     final switch (e.type) {
       case EventType.key:
         auto c = cast(dchar)e.ch;
+        if (e.key == Key.enter) {
+          c = '\n';
+        }
         buf.insertChar(c);
         buf.draw();
         break;

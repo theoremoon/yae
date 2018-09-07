@@ -7,6 +7,7 @@ import std.range;
 import std.traits;
 import std.string;
 import std.conv;
+import std.uni;
 
 version(unittest) import std.algorithm;
 
@@ -85,8 +86,36 @@ class Buffer {
 
     /// insert character at cursor position and set cursor next position
     void insertChar(dchar c) {
-      this.insertAt(cursor.x, cursor.y, c);
-      cursor.x++;
+      if (c == '\n') {
+        this.insertLineAt(cursor.y + 1, "");
+        cursor.x = 0;
+        cursor.y++;
+      }
+      else {
+        this.insertAt(cursor.x, cursor.y, c);
+        cursor.x++;
+      }
+    }
+
+    unittest {
+      auto buf = new Buffer();
+
+      buf.insertChar('H');
+      buf.insertChar('e');
+      buf.insertChar('l');
+      buf.insertChar('l');
+      buf.insertChar('o');
+
+      assert(buf.lines.equal(["Hello"d]));
+      assert(buf.cursor.x == 5);
+      assert(buf.cursor.y == 0);
+
+      buf.insertChar('\n');
+
+      assert(buf.lines.equal(["Hello"d, ""d]));
+      assert(buf.cursor.x == 0);
+      assert(buf.cursor.y == 1);
+
     }
 }
 
