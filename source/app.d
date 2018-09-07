@@ -46,6 +46,11 @@ main_loop:
 
     final switch (e.type) {
       case EventType.key:
+        if (e.key == Key.backspace2) {
+          buf.deleteLeftN(1, true);
+          buf.draw();
+          break;
+        }
         auto c = cast(dchar)e.ch;
         if (e.key == Key.enter) {
           c = '\n';

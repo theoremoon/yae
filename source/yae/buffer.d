@@ -8,8 +8,7 @@ import std.traits;
 import std.string;
 import std.conv;
 import std.uni;
-
-version(unittest) import std.algorithm;
+import std.algorithm;
 
 class Buffer {
   public:
@@ -115,7 +114,71 @@ class Buffer {
       assert(buf.lines.equal(["Hello"d, ""d]));
       assert(buf.cursor.x == 0);
       assert(buf.cursor.y == 1);
+    }
 
+    void insertStr(S)(S s) {
+      foreach (dchar c; s) {
+        this.insertChar(c);
+      }
+    }
+
+    unittest {
+      auto buf = new Buffer();
+
+      buf.insertStr("Hello");
+      assert(buf.lines.equal(["Hello"d]));
+      assert(buf.cursor.x == 5);
+      assert(buf.cursor.y == 0);
+
+      buf.insertStr("\nWorld");
+      assert(buf.lines.equal(["Hello"d, "World"d]));
+      assert(buf.cursor.x == 5);
+      assert(buf.cursor.y == 1);
+    }
+
+    /// delete n characters left of cursor and cursor move left
+    /// delete newline character too if backline is true
+    void deleteLeftN(int n, bool backline=true) {
+      if (n <= 0) {
+        return;
+      }
+
+      if (cursor.x <= n) {
+        int n2 = n - cursor.x;
+        lines[cursor.y] = lines[cursor.y][cursor.x..$];
+        cursor.x = 0;
+        if (backline && cursor.y > 0) {
+          this.lines = this.lines.remove(cursor.y);
+          cursor.y--;
+          cursor.x = cast(int)lines[cursor.y].length;
+          this.deleteLeftN(n2 - 1, backline);
+        }
+      }
+      else {
+        lines[cursor.y] = lines[cursor.y][0..cursor.x-n] ~ lines[cursor.y][cursor.x..$];
+        cursor.x -= n;
+      }
+    }
+
+    unittest {
+      auto buf = new Buffer();
+
+      buf.insertStr("Hello\nWorld");
+      buf.deleteLeftN(1);
+      assert(buf.lines.equal(["Hello"d, "Worl"d]));
+      assert(buf.cursor.x == 4);
+
+      buf.deleteLeftN(2);
+      assert(buf.lines.equal(["Hello"d, "Wo"d]));
+      assert(buf.cursor.x == 2);
+
+      buf.deleteLeftN(3, false);
+      assert(buf.lines.equal(["Hello"d, ""d]));
+      assert(buf.cursor.x == 0);
+
+      buf.deleteLeftN(3, true);
+      assert(buf.lines.equal(["Hel"d]));
+      assert(buf.cursor.x == 3);
     }
 }
 
