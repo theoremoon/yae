@@ -27,6 +27,7 @@ void main()
   auto buf = new Buffer();
 
   init();
+  scope(exit) shutdown();
   clear();
 
   setInputMode(InputMode.esc | InputMode.mouse);
@@ -55,6 +56,9 @@ main_loop:
         if (e.key == Key.enter) {
           c = '\n';
         }
+        else if (e.key == Key.space) {
+          c = ' ';
+        }
         buf.insertChar(c);
         buf.draw();
         break;
@@ -65,5 +69,4 @@ main_loop:
     }
   }
 
-  shutdown();
 }
