@@ -1,0 +1,7 @@
+{
+	"fileVersion": 1,
+	"versions": {
+		"dcharwidth": "0.0.1",
+		"termbox": "0.0.5"
+	}
+}
