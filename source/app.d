@@ -1,46 +1,12 @@
 import termbox;
+import yae.buffer;
 import dcharwidth;
-
-struct Cursor {
-  public:
-    int x, y;
-}
-
-import std.array;
-import std.range;
-class Buffer {
-  public:
-    dstring[] lines;
-    Cursor cursor;
-
-    this() {
-      this.cursor.x = 0;
-      this.cursor.y = 0;
-      this.lines = [""];
-    }
-
-    void insert(S)(int x, int y, S s) {
-      if (0 < y || x < 0) { return; }
-      if (this.lines.length <= y) {
-        this.lines ~= ""d.repeat.take(y - this.lines.length + 1).array;
-      }
-      if (this.lines[y].length < x) {
-        this.lines[y] ~= (cast(dchar)' ').repeat.take(x - this.lines[y].length).array;
-      }
-
-      this.lines[y].insertInPlace(x, s.to!(dchar[]));
-    }
-
-    void insertChar(dchar c) {
-      this.insert(cursor.x, cursor.y, c);
-      cursor.x++;
-    }
-}
 
 void draw(Buffer buf)
 {
-  int x = 0, y = 0;
+  int y = 0;
   foreach (line; buf.lines) {
+    int x = 0;
     foreach (dchar c; line) {
       setCell(x, y, c, Color.basic, Color.basic);
       x += c.dcharWidth();
@@ -53,8 +19,6 @@ void draw(Buffer buf)
 
   flush();
 }
-
-import std.conv;
 import std.stdio;
 void main()
 {
@@ -68,6 +32,9 @@ void main()
   int x = 0, y = 0;
   setCursor(x, y);
   flush();
+
+  buf.insertAt(5, 10, "HELLO WORLD");
+  buf.draw();
 
 main_loop:
   while (true) {
