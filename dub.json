@@ -1,0 +1,17 @@
+{
+  "name": "yae",
+  "authors": [
+    "theoldmoon0602"
+  ],
+  "description": "A minimal D application.",
+  "license": "proprietary",
+  "dependencies": {
+    "termbox": "*",
+    "dcharwidth": "~>0.0.1"
+  },
+  "buildTypes": {
+    "unittests": {
+      "targetType": "none"
+    }
+  }
+}
