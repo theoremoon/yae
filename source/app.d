@@ -51,7 +51,10 @@ main_loop:
     final switch (e.type) {
       case EventType.key:
         auto k = e.toYaeKey;
-        if (k == Key.Backspace) {
+        if (k == Key.ctrl('q')) {
+          break main_loop;
+        }
+        else if (k == Key.Backspace) {
           buf.deleteLeftN(1, true);
           buf.draw();
         }

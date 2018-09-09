@@ -67,7 +67,7 @@ string specialKeyToString(uint k) {
   return map[k];
 }
 
-class Key {
+struct Key {
   public:
     uint code;
     uint sp;
@@ -77,6 +77,17 @@ class Key {
       this.code =code;
       this.sp = sp;
       this.mod = mod;
+    }
+
+    static Key ctrl(uint code) {
+      return Key(code, 0, ModKey.Ctrl);
+    }
+
+    Key withCtrl() {
+      return Key(code, sp, mod | ModKey.Ctrl);
+    }
+    Key withAlt() {
+      return Key(code, sp, mod | ModKey.Alt);
     }
 
     bool isAlt() {
@@ -110,9 +121,7 @@ class Key {
       return this.isCtrl && (this.code == '/' || this.code == '_' || this.code == '7');
     }
 
-    override bool opEquals(Object o) {
-      auto k = cast(Key)o;
-
+    bool opEquals(Key k) {
       if (this.isAlt != k.isAlt) {
         return false;
       }
@@ -134,34 +143,34 @@ class Key {
       return false;
     }
     unittest {
-      assert(new Key('a', 0, 0) == new Key('a', 0, 0));
-      assert(new Key('a', 0, ModKey.Alt) == new Key('a', 0, ModKey.Alt));
-      assert(new Key('a', 0, ModKey.Ctrl) == new Key('a', 0, ModKey.Ctrl));
-      assert(new Key('a', 0, ModKey.Alt | ModKey.Ctrl) == new Key('a', 0, ModKey.Alt | ModKey.Ctrl));
+      assert(Key('a', 0, 0) == Key('a', 0, 0));
+      assert(Key('a', 0, ModKey.Alt) == Key('a', 0, ModKey.Alt));
+      assert(Key('a', 0, ModKey.Ctrl) == Key('a', 0, ModKey.Ctrl));
+      assert(Key('a', 0, ModKey.Alt | ModKey.Ctrl) == Key('a', 0, ModKey.Alt | ModKey.Ctrl));
 
-      assert(new Key('a', 0, 0) != new Key('A', 0, 0));
-      assert(new Key('a', 0, 0) != new Key('a', 0, ModKey.Alt));
-      assert(new Key('a', 0, ModKey.Alt) != new Key('b', 0, ModKey.Alt));
-      assert(new Key('a', 0, ModKey.Alt) != new Key('a', 0, ModKey.Ctrl));
-      assert(new Key('a', 0, ModKey.Alt) != new Key('a', 0, ModKey.Ctrl | ModKey.Alt));
+      assert(Key('a', 0, 0) != Key('A', 0, 0));
+      assert(Key('a', 0, 0) != Key('a', 0, ModKey.Alt));
+      assert(Key('a', 0, ModKey.Alt) != Key('b', 0, ModKey.Alt));
+      assert(Key('a', 0, ModKey.Alt) != Key('a', 0, ModKey.Ctrl));
+      assert(Key('a', 0, ModKey.Alt) != Key('a', 0, ModKey.Ctrl | ModKey.Alt));
 
-      assert(new Key(0, SpecialKey.Enter, 0) == new Key(0, SpecialKey.Enter, 0));
-      assert(new Key(0, SpecialKey.Enter, 0) == new Key('m', 0, ModKey.Ctrl));
-      assert(new Key(0, SpecialKey.Enter, 0) == new Key('\n', 0, 0));
-      assert(new Key(0, SpecialKey.Esc, 0) == new Key('[', 0, ModKey.Ctrl));
-      assert(new Key(0, SpecialKey.Esc, 0) == new Key('3', 0, ModKey.Ctrl));
+      assert(Key(0, SpecialKey.Enter, 0) == Key(0, SpecialKey.Enter, 0));
+      assert(Key(0, SpecialKey.Enter, 0) == Key('m', 0, ModKey.Ctrl));
+      assert(Key(0, SpecialKey.Enter, 0) == Key('\n', 0, 0));
+      assert(Key(0, SpecialKey.Esc, 0) == Key('[', 0, ModKey.Ctrl));
+      assert(Key(0, SpecialKey.Esc, 0) == Key('3', 0, ModKey.Ctrl));
 
-      assert(new Key(0, SpecialKey.Enter, ModKey.Ctrl) != new Key('m', 0, ModKey.Ctrl));
+      assert(Key(0, SpecialKey.Enter, ModKey.Ctrl) != Key('m', 0, ModKey.Ctrl));
     }
 
     static Key Enter() {
-      return new Key('\n', SpecialKey.Enter, 0);
+      return Key('\n', SpecialKey.Enter, 0);
     }
     static Key Backspace() {
-      return new Key('\b', SpecialKey.Backspace, 0);
+      return Key('\b', SpecialKey.Backspace, 0);
     }
 
-    override string toString() {
+    string toString() {
       char[] s = [];
       if (this.isAlt) { s ~= "M-"; }
       if (this.isEnter) { s ~= "Enter"; }
@@ -180,10 +189,10 @@ class Key {
       return s.to!string;
     }
     unittest {
-      assert((new Key('a')).toString() == "a");
-      assert((new Key('a', 0, ModKey.Alt)).toString() == "M-a");
-      assert((new Key('a', 0, ModKey.Ctrl | ModKey.Alt)).toString() == "M-C-a");
-      assert((new Key('i', 0, ModKey.Ctrl)).toString() == "Tab");
+      assert((Key('a')).toString() == "a");
+      assert((Key('a', 0, ModKey.Alt)).toString() == "M-a");
+      assert((Key('a', 0, ModKey.Ctrl | ModKey.Alt)).toString() == "M-C-a");
+      assert((Key('i', 0, ModKey.Ctrl)).toString() == "Tab");
       assert(this.Backspace.toString() == "BS");
       assert(this.Enter.toString() == "Enter");
     }
@@ -191,54 +200,55 @@ class Key {
 
 Key toYaeKey(Event e) {
   if (e.type != EventType.key) {
-    return new Key(0, 0, 0);
+    return Key(0, 0, 0);
   }
 
   if (e.key == 0) {
-    return new Key(e.ch, 0, e.mod);
+    return Key(e.ch, 0, e.mod);
   }
 
   if (termKey.arrowRight <= e.key && e.key <= termKey.f1) {
-    return new Key(0, e.key, e.mod);
+    return Key(0, e.key, e.mod);
   }
   if (e.key == termKey.space) {
-    return new Key(' ', 0, e.mod);
+    return Key(' ', 0, e.mod);
   }
   if (e.key == termKey.tab) {
-    return new Key('\t', 0, e.mod);
+    return Key('\t', 0, e.mod);
   }
   if (e.key == termKey.enter) {
-    return new Key('\n', SpecialKey.Enter, e.mod);
+    return Key('\n', SpecialKey.Enter, e.mod);
   }
   if (e.key == termKey.esc) {
-    return new Key('\x1b', SpecialKey.Esc, e.mod);
+    return Key('\x1b', SpecialKey.Esc, e.mod);
   }
   if (e.key == termKey.backspace2) {
-    return new Key('\b', SpecialKey.Backspace, e.mod);
+    return Key('\b', SpecialKey.Backspace, e.mod);
   }
   if (e.key == termKey.ctrlTilde) {
-    return new Key('~', 0, e.mod | ModKey.Ctrl);
+    return Key('~', 0, e.mod | ModKey.Ctrl);
   }
   if (e.key == termKey.ctrlBackslash) {
-    return new Key('\\', 0, e.mod | ModKey.Ctrl);
+    return Key('\\', 0, e.mod | ModKey.Ctrl);
   }
   if (e.key == termKey.ctrlRsqBracket) {
-    return new Key(']', 0, e.mod | ModKey.Ctrl);
+    return Key(']', 0, e.mod | ModKey.Ctrl);
   }
   if (e.key == termKey.ctrlSlash) {
-    return new Key('/', 0, e.mod | ModKey.Ctrl);
+    return Key('/', 0, e.mod | ModKey.Ctrl);
   }
   // this is only number key not clashed with any other special characters
   if (e.key == termKey.ctrl6) {
-    return new Key('6', 0, e.mod | ModKey.Ctrl);
+    return Key('6', 0, e.mod | ModKey.Ctrl);
   }
   if (termKey.ctrlA <= e.key && e.key <= termKey.ctrlZ) {
-    return new Key(cast(uint)('a') - e.key, 0, e.mod | ModKey.Ctrl);
+    return Key(0x60 + e.key, 0, e.mod | ModKey.Ctrl);
   }
 
-  return new Key(e.key, 0, e.mod);
+  return Key(e.key, 0, e.mod);
 }
 unittest {
+  assert(Event(EventType.key, 0, termKey.ctrlQ, 0, 0, 0, 0, 0).toYaeKey() == Key.ctrl('q'));
   assert(Event(EventType.key, 0, termKey.enter, 0, 0, 0, 0, 0).toYaeKey() == Key.Enter);
   assert(Event(EventType.key, 0, termKey.backspace2, 0, 0, 0, 0, 0).toYaeKey() == Key.Backspace);
 }
