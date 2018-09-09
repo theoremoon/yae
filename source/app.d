@@ -1,5 +1,6 @@
 import termbox;
 import yae.buffer;
+import yae.key : Key, toYaeKey;
 import dcharwidth;
 
 void draw(Buffer buf)
@@ -21,7 +22,9 @@ void draw(Buffer buf)
 
   flush();
 }
+
 import std.stdio;
+import std.format;
 void main()
 {
   auto buf = new Buffer();
@@ -47,20 +50,15 @@ main_loop:
 
     final switch (e.type) {
       case EventType.key:
-        if (e.key == Key.backspace2) {
+        auto k = e.toYaeKey;
+        if (k == Key.Backspace) {
           buf.deleteLeftN(1, true);
           buf.draw();
-          break;
         }
-        auto c = cast(dchar)e.ch;
-        if (e.key == Key.enter) {
-          c = '\n';
+        else if (k.code != 0) {
+          buf.insertChar(cast(dchar)k.code);
+          buf.draw();
         }
-        else if (e.key == Key.space) {
-          c = ' ';
-        }
-        buf.insertChar(c);
-        buf.draw();
         break;
       case EventType.resize:
         break;
