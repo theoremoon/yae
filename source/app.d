@@ -7,18 +7,29 @@ void draw(Buffer buf)
 {
   clear();
 
+  int w = width();
   int y = 0;
   foreach (line; buf.lines) {
     int x = 0;
     foreach (dchar c; line) {
+      auto cw = c.dcharWidth;
+      if (x + cw > w) {
+        y++;
+        x = 0;
+      }
       setCell(x, y, c, Color.basic, Color.basic);
       x += c.dcharWidth();
     }
     y++;
   }
 
-  int vx = buf.lines[buf.cursor.y][0..buf.cursor.x].stringWidth();
-  setCursor(vx, buf.cursor.y);
+  int cx = buf.lines[buf.cursor.y][0..buf.cursor.x].stringWidth();
+  int cy = buf.cursor.y;
+  while (cx > w) {
+    cy++;
+    cx -= w;
+  }
+  setCursor(cx, cy);
 
   flush();
 }
