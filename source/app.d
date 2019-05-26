@@ -7,7 +7,7 @@ void draw(Buffer buf)
 {
   clear();
 
-  int w = width();
+  long w = width();
   int y = 0;
   foreach (line; buf.lines) {
     int x = 0;
@@ -18,13 +18,13 @@ void draw(Buffer buf)
         x = 0;
       }
       setCell(x, y, c, Color.basic, Color.basic);
-      x += c.dcharWidth();
+      x += cw;
     }
     y++;
   }
 
   int cx = buf.lines[buf.cursor.y][0..buf.cursor.x].stringWidth();
-  int cy = buf.cursor.y;
+  int cy = cast(int)buf.cursor.y;
   while (cx > w) {
     cy++;
     cx -= w;
@@ -65,14 +65,31 @@ main_loop:
         if (k == Key.ctrl('q')) {
           break main_loop;
         }
+        else if (k == Key.ctrl('a')) {
+          buf.setCursor(0, buf.cursor.y);
+        }
+        else if (k == Key.ctrl('e')) {
+          buf.setCursor(int.max, buf.cursor.y);
+        }
+        else if (k == Key.ctrl('h')) {
+          buf.moveCursorLeft();
+        }
+        else if (k == Key.ctrl('n')) {
+          buf.moveCursorDown();
+        }
+        else if (k == Key.ctrl('p')) {
+          buf.moveCursorUp();
+        }
+        else if (k == Key.ctrl('l')) {
+          buf.moveCursorRight();
+        }
         else if (k == Key.Backspace) {
           buf.deleteLeftN(1, true);
-          buf.draw();
         }
         else if (k.code != 0) {
           buf.insertChar(cast(dchar)k.code);
-          buf.draw();
         }
+        buf.draw();
         break;
       case EventType.resize:
         break;

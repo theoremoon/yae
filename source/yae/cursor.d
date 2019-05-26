@@ -2,5 +2,5 @@ module yae.cursor;
 
 struct Cursor {
   public:
-    int x, y;
+    long x, y;
 }

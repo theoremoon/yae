@@ -21,9 +21,120 @@ class Buffer {
       this.lines = [""];
     }
 
+    void setCursor(long x, long y) {
+      if (y < 0 || this.lines.length <= y || x < 0) {
+        return;
+      }
+      x = min(this.lines[y].length, x);
+      this.cursor.x = x;
+      this.cursor.y = y;
+    }
+
+    void moveCursorLeft(uint times) {
+      foreach (_; 0..times) {
+        this.moveCursorLeft();
+      }
+    }
+
+    void moveCursorLeft() {
+        long newx = this.cursor.x -1;
+        if (newx < 0) {
+          if (0 <= this.cursor.y-1) {
+            this.cursor.y--;
+            this.cursor.x = this.lines[this.cursor.y].length;
+          }
+        } else {
+          this.cursor.x = newx;
+        }
+    }
+
+    void moveCursorRight(uint times) {
+      foreach (_; 0..times) {
+        this.moveCursorRight();
+      }
+    }
+
+    void moveCursorRight() {
+      long newx = this.cursor.x + 1;
+      if (this.lines[this.cursor.y].length < newx) {
+        if (this.cursor.y+1 < this.lines.length) {
+          this.cursor.y++;
+          this.cursor.x = 0;
+        }
+      } else {
+        this.cursor.x = newx;
+      }
+    }
+
+    void moveCursorUp(uint times) {
+      foreach (_; 0..times) {
+        this.moveCursorUp();
+      }
+    }
+
+    void moveCursorUp() {
+      long newy = this.cursor.y - 1;
+      if (newy < 0) {
+        return;
+      }
+      this.cursor.x = min(this.cursor.x, this.lines[newy].length);
+      this.cursor.y = newy;
+    }
+
+    void moveCursorDown(uint times) {
+      foreach (_; 0..times) {
+        this.moveCursorDown();
+      }
+    }
+
+    void moveCursorDown() {
+      long newy = this.cursor.y + 1;
+      if (this.lines.length <= newy) {
+        return;
+      }
+      this.cursor.x = min(this.cursor.x, this.lines[newy].length);
+      this.cursor.y = newy;
+    }
+    unittest {
+      auto buf = new Buffer();
+
+      buf.insertStr("The\nquick\nbrown\nfox\njumps\nover\nthe\nlazy\ndog.");
+      assert(buf.cursor.x == 4);
+      assert(buf.cursor.y == 8);
+
+      buf.moveCursorLeft();
+      assert(buf.cursor.x == 3);
+      assert(buf.cursor.y == 8);
+
+      buf.moveCursorLeft(4);
+      assert(buf.cursor.x == 4);
+      assert(buf.cursor.y == 7);
+
+      buf.moveCursorRight();
+      assert(buf.cursor.x == 0);
+      assert(buf.cursor.y == 8);
+
+      buf.moveCursorUp(10);
+      assert(buf.cursor.x == 0);
+      assert(buf.cursor.y == 0);
+
+      buf.setCursor(1000, 2);
+      assert(buf.cursor.x == 5);
+      assert(buf.cursor.y == 2);
+
+      buf.moveCursorDown();
+      assert(buf.cursor.x == 3);
+      assert(buf.cursor.y == 3);
+
+      buf.moveCursorDown();
+      assert(buf.cursor.x == 3);
+      assert(buf.cursor.y == 4);
+    }
+
+
     /// insert new line at (0, y)
     /// this function doesn't change cursor position
-    void insertLineAt(S)(int y, S s) {
+    void insertLineAt(S)(long y, S s) {
       if (y < 0) { return; }
       if (this.lines.length <= y) {
         this.lines ~= ""d.repeat.take(y - this.lines.length).array;
@@ -33,7 +144,7 @@ class Buffer {
 
     /// insert character or string at (x, y)
     /// this function doesn't change cursor position
-    void insertAt(S)(int x, int y, S s) {
+    void insertAt(S)(long x, long y, S s) {
       if (y < 0 || x < 0) { return; }
 
       if (this.lines.length <= y) {
@@ -138,19 +249,19 @@ class Buffer {
 
     /// delete n characters left of cursor and cursor move left
     /// delete newline character too if backline is true
-    void deleteLeftN(int n, bool backline=true) {
+    void deleteLeftN(long n, bool backline=true) {
       if (n <= 0) {
         return;
       }
 
       if (cursor.x <= n) {
-        int n2 = n - cursor.x;
+        long n2 = n - cursor.x;
         lines[cursor.y] = lines[cursor.y][cursor.x..$];
         cursor.x = 0;
         if (backline && cursor.y > 0) {
           this.lines = this.lines.remove(cursor.y);
           cursor.y--;
-          cursor.x = cast(int)lines[cursor.y].length;
+          cursor.x = lines[cursor.y].length;
           this.deleteLeftN(n2 - 1, backline);
         }
       }
